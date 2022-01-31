@@ -1,6 +1,3 @@
-// Gather_Concordance.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <string>
 #include <sstream>
 #include <cstdio>
@@ -95,76 +92,95 @@ int main()
 		bestWorstCase = 1000000;
 		guessNum++;
 		cout << "Choosing guess #" << guessNum << endl;
-		for (int i = 0; i < Guesses.size(); i++) //Go through all Guesses.
+				if (guessNum == 1)
 		{
-			inSolution = false;
-			for (int j = 0; j < totalValuesForLength; j++) //Set counts for each possibility to 0.
+			if (gamechoice == 1) { cout << "Guess: raise. Worst case scenario is 168 possible words left.\n"; bestGuessIndex = 12325;}
+			else
 			{
-				possibilityMatrix[j] = 0;
+				if (wordLength == 4) { cout << "Guess: olea. Worst case scenario is 332 possible words left.\n"; bestGuessIndex = 2485; }
+				else if (wordLength == 5) { cout << "Guess: raise. Worst case scenario is 211 possible words left.\n"; bestGuessIndex = 8857; }
+				else if (wordLength == 6) { cout << "Guess: tailer.Worst case scenario is 125 possible words left.\n"; bestGuessIndex = 13566; }
+				else if (wordLength == 7) { cout << "Guess: tenails. Worst case scenario is 71 possible words left.\n"; bestGuessIndex = 21087; }
+				else if (wordLength == 8) { cout << "Guess: centrals. Worst case scenario is 35 possible words left.\n"; bestGuessIndex = 4270; }
+				else if (wordLength == 9) { cout << "Guess: secretion. Worst case scenario is 21 possible words left.\n"; bestGuessIndex = 22855; }
+				else if (wordLength == 10) { cout << "Guess: centralist. Worst case scenario is 15 possible words left.\n"; bestGuessIndex = 3015; }
+				else if (wordLength == 11) { cout << "Guess: pancreatins. Worst case scenario is 9 possible words left.\n"; bestGuessIndex = 10218; }
 			}
-			for (int j = 0; j < Solutions.size(); j++)//Go through all Solutions.
+		}
+		else
+		{
+			for (int i = 0; i < Guesses.size(); i++) //Go through all Guesses.
 			{
-				if (Guesses[i].compare(Solutions[j])==0)
-					inSolution = true;
-				for (int k = 0; k < wordLength; k++)
+				inSolution = false;
+				for (int j = 0; j < totalValuesForLength; j++) //Set counts for each possibility to 0.
 				{
-					currentscores[k] = -1; //Reset all scores.
-					if (Guesses[i][k] == Solutions[j][k]) //If a value matches, set as 2 (green).
-						currentscores[k] = 2;
+					possibilityMatrix[j] = 0;
 				}
-				for (int k = 0; k < wordLength; k++)
+				for (int j = 0; j < Solutions.size(); j++)//Go through all Solutions.
 				{
-					if (currentscores[k] != 2)
+					if (Guesses[i].compare(Solutions[j]) == 0)
+						inSolution = true;
+					for (int k = 0; k < wordLength; k++)
 					{
-						countInGuess= 0;
-						for (int l = 0; l <=k; l++) //Find how many of the letter are in the word up to that point.
-						{
-							if (Guesses[i][k] == Guesses[i][l]) //Count how many times the letter is found in the guess up to the letter's point. Needed for multiple occurrences of letter in word.
-								countInGuess++;
-						}
-						countInSolution = 0;
-						for (int l = 0; l < wordLength; l++) //Count number of guesses in solution.
-						{
-							if (Guesses[i][k] == Solutions[j][l] && currentscores[l]!=2) //Do not check matched locations to avoid things like guess aah vs cat calling first 'a' yellow.
-								countInSolution++;
-						}
-						if (countInGuess !=0 && countInGuess <= countInSolution) //Since can't be a match, if letter occurs in solution more or equal to guess, letter in wrong place (yellow). Assign 1. 
-							currentscores[k] = 1;
-						else //If not 2 and not 1, assign 0 (letter not found).
-							currentscores[k] = 0;
+						currentscores[k] = -1; //Reset all scores.
+						if (Guesses[i][k] == Solutions[j][k]) //If a value matches, set as 2 (green).
+							currentscores[k] = 2;
 					}
+					for (int k = 0; k < wordLength; k++)
+					{
+						if (currentscores[k] != 2)
+						{
+							countInGuess = 0;
+							for (int l = 0; l <= k; l++) //Find how many of the letter are in the word up to that point.
+							{
+								if (Guesses[i][k] == Guesses[i][l]) //Count how many times the letter is found in the guess up to the letter's point. Needed for multiple occurrences of letter in word.
+									countInGuess++;
+							}
+							countInSolution = 0;
+							for (int l = 0; l < wordLength; l++) //Count number of guesses in solution.
+							{
+								if (Guesses[i][k] == Solutions[j][l] && currentscores[l] != 2) //Do not check matched locations to avoid things like guess aah vs cat calling first 'a' yellow.
+									countInSolution++;
+							}
+							if (countInGuess <= countInSolution) //Since can't be a match, if letter occurs in solution more or equal to guess, letter in wrong place (yellow). Assign 1. 
+								currentscores[k] = 1;
+							else //If not 2 and not 1, assign 0 (letter not found).
+								currentscores[k] = 0;
+						}
+					}
+					//Convert base-3 number into base-10 number.
+					currentSolutionValue = 0;
+					multiplier = 1;
+					for (int k = wordLength - 1; k >= 0; k--)
+					{
+						currentSolutionValue = currentSolutionValue + (multiplier * currentscores[k]);
+						multiplier = multiplier * 3;
+					}
+					possibilityMatrix[currentSolutionValue]++; //Increment solutions of this score.
 				}
-				//Convert base-3 number into base-10 number.
-				currentSolutionValue = 0;
-				multiplier = 1;
-				for (int k = wordLength-1; k>=0; k--)
+				worstCaseCount = 0; //Look for what the worst number of words kept can be.
+				for (int j = 0; j < totalValuesForLength; j++)
 				{
-					currentSolutionValue = currentSolutionValue + (multiplier * currentscores[k]);
-					multiplier = multiplier * 3;
+					if (possibilityMatrix[j] > worstCaseCount)
+						worstCaseCount = possibilityMatrix[j];
 				}
-				possibilityMatrix[currentSolutionValue]++; //Increment solutions of this score.
-			}
-			worstCaseCount = 0; //Look for what the worst number of words kept can be.
-			for (int j = 0; j < totalValuesForLength; j++)
-			{
-				if (possibilityMatrix[j] > worstCaseCount)
-					worstCaseCount = possibilityMatrix[j];
-			}
-			if (worstCaseCount < bestWorstCase) //If the worst case for this word is better than the bestWorstCase word, take new word.
-			{
-				bestWorstCase = worstCaseCount;
-				bestGuessIndex = i;
-			}
-			else if (worstCaseCount == bestWorstCase)
-			{
-				if (inSolution == true)
+				if (worstCaseCount < bestWorstCase) //If the worst case for this word is better than the bestWorstCase word, take new word.
 				{
 					bestWorstCase = worstCaseCount;
 					bestGuessIndex = i;
 				}
+				else if (worstCaseCount == bestWorstCase)
+				{
+					if (inSolution == true)
+					{
+						bestWorstCase = worstCaseCount;
+						bestGuessIndex = i;
+					}
+				}
 			}
+			cout << "Guess: " << Guesses[bestGuessIndex] << ". Worst case scenario is " << bestWorstCase << " possible words left." << endl;
+			//cout << "Index is: " << bestGuessIndex << endl;
 		}
-		cout << "Guess: " << Guesses[bestGuessIndex] << ". Worst case scenario is " << bestWorstCase << " possible words left." << endl;
 		cout << "Enter numeric guess result. 2 for green, 1 for yellow, 0 for grey. Press [enter] after last number. No spaces." << endl;
 		cin >> guessResultString;
 		inputCorrect = true;
@@ -226,7 +242,7 @@ int main()
 					countInSolution = 0;
 					for (int l = 0; l < wordLength; l++) //Count number of guesses in solution.
 					{
-						if (Guesses[bestGuessIndex][k] == Solutions[j][l])
+						if (Guesses[bestGuessIndex][k] == Solutions[j][l] && currentscores[l] != 2)
 							countInSolution++;
 					}
 					if (countInGuess <= countInSolution) //Since can't be a match, if letter occurs in solution more or equal to guess, letter in wrong place (yellow). Assign 1. 
